@@ -1,8 +1,9 @@
 package views;
 
-import controllers.UserController;
-
 import javax.swing.*;
+
+import controller.UserController;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +19,7 @@ public class RegisterPage extends JFrame {
         userController = new UserController();
 
         // Frame ayarları
-        setTitle("Register Page");
+        setTitle("Kayıt Ol Sayfası");
         setSize(450, 400); // Yüksekliği artırdık, "Login" butonu için
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -26,7 +27,7 @@ public class RegisterPage extends JFrame {
         // Başlık Paneli
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(100, 149, 237));
-        JLabel headerLabel = new JLabel("Create Your Account");
+        JLabel headerLabel = new JLabel("Hesap Oluşturun");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 20));
         headerLabel.setForeground(Color.WHITE);
         headerPanel.add(headerLabel);
@@ -40,7 +41,7 @@ public class RegisterPage extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Kullanıcı Adı
-        JLabel usernameLabel = new JLabel("Username:");
+        JLabel usernameLabel = new JLabel("Kullanıcı Adı:");
         usernameField = new JTextField();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -50,7 +51,7 @@ public class RegisterPage extends JFrame {
         panel.add(usernameField, gbc);
 
         // Şifre
-        JLabel passwordLabel = new JLabel("Password:");
+        JLabel passwordLabel = new JLabel("Şifre:");
         passwordField = new JPasswordField();
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -60,7 +61,7 @@ public class RegisterPage extends JFrame {
         panel.add(passwordField, gbc);
 
         // E-posta
-        JLabel emailLabel = new JLabel("Email:");
+        JLabel emailLabel = new JLabel("E-Posta:");
         emailField = new JTextField();
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -70,7 +71,7 @@ public class RegisterPage extends JFrame {
         panel.add(emailField, gbc);
 
         // Kayıt Butonu
-        JButton registerButton = new JButton("Register");
+        JButton registerButton = new JButton("Kayıt Ol");
         registerButton.setBackground(new Color(50, 205, 50));
         registerButton.setForeground(Color.WHITE);
         registerButton.setFocusPainted(false);
@@ -79,7 +80,7 @@ public class RegisterPage extends JFrame {
         panel.add(registerButton, gbc);
 
         // Login Butonu
-        JButton loginButton = new JButton("Back to Login");
+        JButton loginButton = new JButton("Girişe Dön");
         loginButton.setBackground(new Color(70, 130, 180));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
@@ -116,20 +117,59 @@ public class RegisterPage extends JFrame {
         String email = emailField.getText();
 
         if (username.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all the fields!", "Error", JOptionPane.ERROR_MESSAGE);
+            showCustomDialog("Hata!", "Lütfen tüm alanları doldurun!", new Color(255, 69, 0));
             return;
         }
 
         boolean isRegistered = userController.register(username, password, email);
 
         if (isRegistered) {
-            JOptionPane.showMessageDialog(this, "Kayıt Başarılı! Giriş Sayfasına Yönlendiriliyor...");
+            showCustomDialog("Başarılı!", "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz...", new Color(50, 205, 50));
             dispose(); // Bu sayfayı kapat
             LoginPage loginPage = new LoginPage(); // Giriş sayfasına yönlendir
             loginPage.setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Registration Failed! Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            showCustomDialog("Hata!", "Kayıt başarısız! Lütfen tekrar deneyin.", new Color(255, 69, 0));
         }
+    }
+
+    private void showCustomDialog(String title, String message, Color color) {
+        // Özel hata/bilgi penceresi
+        JDialog dialog = new JDialog(this, title, true);
+        dialog.setSize(350, 150);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        dialog.setLayout(new BorderLayout());
+        dialog.setResizable(false);
+
+        // Başlık paneli
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(color);
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setForeground(Color.WHITE);
+        headerPanel.add(titleLabel);
+        dialog.add(headerPanel, BorderLayout.NORTH);
+
+        // Mesaj paneli
+        JPanel messagePanel = new JPanel();
+        JLabel messageLabel = new JLabel(message);
+        messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        messagePanel.add(messageLabel);
+        dialog.add(messagePanel, BorderLayout.CENTER);
+
+        // Kapat butonu
+        JPanel buttonPanel = new JPanel();
+        JButton closeButton = new JButton("Tamam");
+        closeButton.setBackground(new Color(70, 130, 180));
+        closeButton.setForeground(Color.WHITE);
+        closeButton.setFocusPainted(false);
+        closeButton.addActionListener(e -> dialog.dispose());
+        buttonPanel.add(closeButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Ortada göster
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     public static void main(String[] args) {

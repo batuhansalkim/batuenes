@@ -1,9 +1,11 @@
 package views;
 
-import controllers.UserController;
 import models.User;
 
 import javax.swing.*;
+
+import controller.UserController;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

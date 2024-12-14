@@ -1,4 +1,4 @@
-package controllers;
+package controller;
 
 import config.DatabaseConnection;
 import models.User;
