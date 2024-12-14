@@ -1,6 +1,6 @@
 package views;
 import javax.swing.table.DefaultTableModel;
-
+import javax.swing.table.TableColumn;
 import models.Book;
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +14,13 @@ public class BooksPage extends JFrame {
 
     public BooksPage() {
         // Frame ayarları
+        bookController = new BookController();
+        String[] statuses = bookController.getStatuses().toArray(new String[0]);
+        JComboBox<String> statusComboBox = new JComboBox<>(statuses);
         setTitle("Kitaplar Sayfası - Library Management System");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-
-        // Controller'ı başlat
-        bookController = new BookController();
 
         // Başlık Paneli
         JPanel headerPanel = new JPanel();
@@ -66,15 +66,68 @@ public class BooksPage extends JFrame {
 
     // Veritabanından kitapları yükle
     private void loadBooksFromDatabase() {
-        List<Book> books = bookController.getBooks();
+    List<Book> books = bookController.getBooks();
 
-        // Mevcut tabloyu temizle
-        tableModel.setRowCount(0);
+    // Mevcut tabloyu temizle
+    tableModel.setRowCount(0);
 
-        // Kitapları tabloya ekle
-        for (Book book : books) {
-            Object[] row = {book.getBookId(), book.getTitle(), book.getAuthor(), book.getCategory(), book.getStatus()};
-            tableModel.addRow(row);
+    // Kitapları tabloya ekle
+    for (Book book : books) {
+        Object[] row = {book.getBookId(), book.getTitle(), book.getAuthor(), book.getCategory(), book.getStatus()};
+        tableModel.addRow(row);
+    }
+
+    // Durum sütununu JComboBox ile düzenlenebilir yap
+    String[] statuses = {"Rafta", "Odunc", "Kayıp"};
+    TableColumn statusColumn = booksTable.getColumnModel().getColumn(4);
+    JComboBox<String> statusComboBox = new JComboBox<>(statuses);
+    statusColumn.setCellEditor(new DefaultCellEditor(statusComboBox));
+
+    // Tabloya listener ekle
+    tableModel.addTableModelListener(e -> {
+        int row = e.getFirstRow();
+        int column = e.getColumn();
+
+        // Durum sütununda değişiklik olmuşsa
+        if (column == 4) {
+            int bookId = (int) tableModel.getValueAt(row, 0); // Kitap ID'si
+            String newStatus = (String) tableModel.getValueAt(row, column); // Yeni durum
+
+            // Veritabanında güncellemeyi yap
+            boolean success = bookController.updateBookStatus(bookId, newStatus);
+            if (!success) {
+                JOptionPane.showMessageDialog(this, "Durum güncellenirken hata oluştu!", "Hata", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    });
+}
+
+
+
+
+
+
+    private void showEditBookDialog(int bookId) {
+        // Kitap durumu değiştirme paneli
+        JPanel editBookPanel = new JPanel(new GridLayout(2, 2));
+
+        JLabel statusLabel = new JLabel("Durum:");
+        String[] statuses = bookController.getStatuses().toArray(new String[0]); // Status array oluştur
+        JComboBox<String> statusComboBox = new JComboBox<>(statuses); // JComboBox'a bağla
+        editBookPanel.add(statusLabel);
+        editBookPanel.add(statusComboBox);
+
+        // Kullanıcı onay verdiğinde durumu güncelle
+        int option = JOptionPane.showConfirmDialog(this, editBookPanel, "Durumu Güncelle", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option == JOptionPane.OK_OPTION) {
+            String selectedStatus = (String) statusComboBox.getSelectedItem();
+            boolean success = bookController.updateBookStatus(bookId, selectedStatus);
+            if (success) {
+                loadBooksFromDatabase(); // Tablodaki verileri güncelle
+                JOptionPane.showMessageDialog(this, "Durum başarıyla güncellendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Durum güncellenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 

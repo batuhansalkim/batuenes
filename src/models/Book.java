@@ -1,7 +1,7 @@
 package models;
 
 public class Book {
-    private int bookId;
+    private int bookId; // Bu alan veritabanındaki 'book_id' ile eşleşiyor
     private String title;
     private String author;
     private String category;
