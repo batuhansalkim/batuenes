@@ -1,5 +1,5 @@
-package views;
 
+package views;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -67,7 +67,11 @@ public class HomePage extends JFrame {
     BooksPage booksPage = new BooksPage(); // BooksPage sayfasını oluştur
     booksPage.setVisible(true); // BooksPage'i görünür yap
 });
-        studentsButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Öğrenciler ekranına yönlendiriliyorsunuz."));
+        studentsButton.addActionListener(e -> {
+    dispose(); // HomePage ekranını kapat
+    StudentsPage studentsPage = new StudentsPage(); // StudentsPage ekranını başlat
+    studentsPage.setVisible(true); // StudentsPage'i görünür yap
+});
         staffButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Personeller ekranına yönlendiriliyorsunuz."));
         inventoryButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Envanter ekranına yönlendiriliyorsunuz."));
         notificationsButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Bildirim gönderme ekranına yönlendiriliyorsunuz."));
