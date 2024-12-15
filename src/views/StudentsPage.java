@@ -1,3 +1,4 @@
+// StudentsPage.java
 package views;
 
 import javax.swing.*;
@@ -6,6 +7,8 @@ import controller.StudentController;
 import models.User;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -63,19 +66,26 @@ public class StudentsPage extends JFrame {
 
         add(splitPane, BorderLayout.CENTER);
 
-        // Geri Dön Butonu
-        JButton backButton = new JButton("Geri Dön");
-        backButton.addActionListener(e -> {
-            dispose();
-            HomePage homePage = new HomePage("staff");
-            homePage.setVisible(true);
-        });
-        add(backButton, BorderLayout.SOUTH);
+        // Alt Kısım (Butonlar için Panel)
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        JButton addButton = new JButton("Ekle");
+        JButton editButton = new JButton("Düzenle");
+        JButton deleteButton = new JButton("Sil");
+
+        buttonPanel.add(addButton);
+        buttonPanel.add(editButton);
+        buttonPanel.add(deleteButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Buton Aksiyonları
+        addButton.addActionListener(e -> showAddUserDialog());
+        editButton.addActionListener(e -> handleEditButtonClick());
+        deleteButton.addActionListener(e -> handleDeleteButtonClick());
 
         loadUsersFromDatabase();
 
-        // Mouse Click Events
-        addTableMouseListeners();
         setLocationRelativeTo(null);
     }
 
@@ -103,61 +113,80 @@ public class StudentsPage extends JFrame {
         }
     }
 
-    private void addTableMouseListeners() {
-        // Öğrenci Tablosu Çift Tıklama
-        studentsTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int selectedRow = studentsTable.getSelectedRow();
-                    if (selectedRow != -1) {
-                        int userId = (int) studentTableModel.getValueAt(selectedRow, 0);
-                        showUserOptionsDialog(userId, "student");
-                    }
-                }
-            }
-        });
+    private void handleDeleteButtonClick() {
+        int selectedStudentRow = studentsTable.getSelectedRow();
+        int selectedStaffRow = staffTable.getSelectedRow();
 
-        // Personel Tablosu Çift Tıklama
-        staffTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    int selectedRow = staffTable.getSelectedRow();
-                    if (selectedRow != -1) {
-                        int userId = (int) staffTableModel.getValueAt(selectedRow, 0);
-                        showUserOptionsDialog(userId, "staff");
-                    }
-                }
-            }
-        });
+        if (selectedStudentRow != -1) {
+            int userId = (int) studentTableModel.getValueAt(selectedStudentRow, 0);
+            deleteUser(userId, "student");
+        } else if (selectedStaffRow != -1) {
+            int userId = (int) staffTableModel.getValueAt(selectedStaffRow, 0);
+            deleteUser(userId, "staff");
+        } else {
+            JOptionPane.showMessageDialog(this, "Lütfen silmek istediğiniz bir kullanıcı seçin.");
+        }
     }
 
-    private void showUserOptionsDialog(int userId, String userType) {
-        int option = JOptionPane.showOptionDialog(this,
-                userType.equals("student") ? "Öğrenci için işlem seçin:" : "Personel için işlem seçin:",
-                "Kullanıcı İşlemleri",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                new String[]{"Sil", "Düzenle", "Vazgeç"},
-                "Vazgeç");
+    private void handleEditButtonClick() {
+        int selectedStudentRow = studentsTable.getSelectedRow();
+        int selectedStaffRow = staffTable.getSelectedRow();
 
-        if (option == 0) {
+        if (selectedStudentRow != -1) {
+            int userId = (int) studentTableModel.getValueAt(selectedStudentRow, 0);
+            showEditUserDialog(userId, "student");
+        } else if (selectedStaffRow != -1) {
+            int userId = (int) staffTableModel.getValueAt(selectedStaffRow, 0);
+            showEditUserDialog(userId, "staff");
+        } else {
+            JOptionPane.showMessageDialog(this, "Lütfen düzenlemek istediğiniz bir kullanıcı seçin.");
+        }
+    }
+
+    private void deleteUser(int userId, String userType) {
+        boolean success = userType.equals("student")
+                ? studentController.deleteStudent(userId)
+                : studentController.deleteStaff(userId);
+
+        if (success) {
+            loadUsersFromDatabase();
+            JOptionPane.showMessageDialog(this, "Kullanıcı başarıyla silindi.");
+        } else {
+            JOptionPane.showMessageDialog(this, "Kullanıcı silinirken bir hata oluştu.");
+        }
+    }
+
+    private void showAddUserDialog() {
+        JPanel panel = new JPanel(new GridLayout(4, 2));
+        JTextField usernameField = new JTextField();
+        JTextField emailField = new JTextField();
+        JComboBox<String> userTypeComboBox = new JComboBox<>(new String[]{"student", "staff"});
+
+        panel.add(new JLabel("Kullanıcı Adı:"));
+        panel.add(usernameField);
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+        panel.add(new JLabel("Kullanıcı Türü:"));
+        panel.add(userTypeComboBox);
+
+        int option = JOptionPane.showConfirmDialog(this, panel, "Yeni Kullanıcı Ekle", JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == JOptionPane.OK_OPTION) {
+            String username = usernameField.getText();
+            String email = emailField.getText();
+            String userType = (String) userTypeComboBox.getSelectedItem();
+
+            User newUser = new User(0, username, "", userType, email);
             boolean success = userType.equals("student")
-                    ? studentController.deleteStudent(userId)
-                    : studentController.deleteStaff(userId);
+                    ? studentController.addStudent(newUser)
+                    : studentController.addStaff(newUser);
 
             if (success) {
                 loadUsersFromDatabase();
-                JOptionPane.showMessageDialog(this, userType.equals("student") 
-                    ? "Öğrenci başarıyla silindi." 
-                    : "Personel başarıyla silindi.");
+                JOptionPane.showMessageDialog(this, "Kullanıcı başarıyla eklendi.");
             } else {
-                JOptionPane.showMessageDialog(this, "Kullanıcı silinirken bir hata oluştu.");
+                JOptionPane.showMessageDialog(this, "Kullanıcı eklenirken bir hata oluştu.");
             }
-        } else if (option == 1) {
-            showEditUserDialog(userId, userType);
         }
     }
 

@@ -1,4 +1,3 @@
-
 package views;
 import javax.swing.*;
 import java.awt.*;
@@ -55,24 +54,26 @@ public class HomePage extends JFrame {
 
         // Butonlar
         JButton booksButton = new JButton("Kitaplar");
-        JButton studentsButton = new JButton("Öğrenciler");
-        JButton staffButton = new JButton("Personeller");
+        JButton studentsButton = new JButton("Öğrenciler-Personeller");
         JButton inventoryButton = new JButton("Envanter");
         JButton notificationsButton = new JButton("Bildirim Gönder");
+        
+        // Uzatılmış çıkış butonu
         JButton logoutButton = new JButton("Çıkış");
+        logoutButton.setPreferredSize(new Dimension(600, 50)); // Buton boyutunu ayarla
+        logoutButton.setHorizontalAlignment(SwingConstants.CENTER); // Yazıyı ortala
 
         // Buton işlevleri
         booksButton.addActionListener(e -> {
-    dispose(); // Mevcut HomePage ekranını kapat
-    BooksPage booksPage = new BooksPage(); // BooksPage sayfasını oluştur
-    booksPage.setVisible(true); // BooksPage'i görünür yap
-});
+            dispose(); // Mevcut HomePage ekranını kapat
+            BooksPage booksPage = new BooksPage(); // BooksPage sayfasını oluştur
+            booksPage.setVisible(true); // BooksPage'i görünür yap
+        });
         studentsButton.addActionListener(e -> {
-    dispose(); // HomePage ekranını kapat
-    StudentsPage studentsPage = new StudentsPage(); // StudentsPage ekranını başlat
-    studentsPage.setVisible(true); // StudentsPage'i görünür yap
-});
-        staffButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Personeller ekranına yönlendiriliyorsunuz."));
+            dispose(); // HomePage ekranını kapat
+            StudentsPage studentsPage = new StudentsPage(); // StudentsPage ekranını başlat
+            studentsPage.setVisible(true); // StudentsPage'i görünür yap
+        });
         inventoryButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Envanter ekranına yönlendiriliyorsunuz."));
         notificationsButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Bildirim gönderme ekranına yönlendiriliyorsunuz."));
         logoutButton.addActionListener(e -> {
@@ -88,13 +89,13 @@ public class HomePage extends JFrame {
         if (userType.equals("staff")) {
             buttonPanel.add(booksButton);
             buttonPanel.add(studentsButton);
-            buttonPanel.add(staffButton);
             buttonPanel.add(inventoryButton);
             buttonPanel.add(notificationsButton);
         } else if (userType.equals("student")) {
             buttonPanel.add(booksButton);
         }
-        buttonPanel.add(logoutButton); // Çıkış butonu her iki tür için de görünür
+
+        buttonPanel.add(logoutButton); // Uzatılmış çıkış butonu her iki tür için de görünür
 
         add(buttonPanel, BorderLayout.SOUTH);
         setLocationRelativeTo(null); // Ortada açılmasını sağlar

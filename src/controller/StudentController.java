@@ -59,6 +59,36 @@ public class StudentController {
         return staff;
     }
 
+    // Yeni öğrenci ekleme metodu
+    public boolean addStudent(User student) {
+        String query = "INSERT INTO users (username, password, email, user_type) VALUES (?, ?, ?, 'student')";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, student.getUsername());
+            stmt.setString(2, student.getPassword());
+            stmt.setString(3, student.getEmail());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Yeni personel ekleme metodu
+    public boolean addStaff(User staff) {
+        String query = "INSERT INTO users (username, password, email, user_type) VALUES (?, ?, ?, 'staff')";
+        try (Connection connection = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, staff.getUsername());
+            stmt.setString(2, staff.getPassword());
+            stmt.setString(3, staff.getEmail());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // Belirli bir öğrenci ID'sine göre kullanıcı getir
     public User getStudentById(int userId) {
         String query = "SELECT * FROM users WHERE user_id = ? AND user_type = 'student'";
@@ -137,14 +167,13 @@ public class StudentController {
 
     // Öğrenci güncelle
     public boolean updateStudent(User student) {
-        String query = "UPDATE users SET username = ?, password = ?, email = ?, user_type = ? WHERE user_id = ?";
+        String query = "UPDATE users SET username = ?, password = ?, email = ? WHERE user_id = ? AND user_type = 'student'";
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, student.getUsername());
             stmt.setString(2, student.getPassword());
             stmt.setString(3, student.getEmail());
-            stmt.setString(4, student.getUserType());
-            stmt.setInt(5, student.getUserId());
+            stmt.setInt(4, student.getUserId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -154,14 +183,13 @@ public class StudentController {
 
     // Personel güncelle
     public boolean updateStaff(User staff) {
-        String query = "UPDATE users SET username = ?, password = ?, email = ?, user_type = ? WHERE user_id = ?";
+        String query = "UPDATE users SET username = ?, password = ?, email = ? WHERE user_id = ? AND user_type = 'staff'";
         try (Connection connection = DatabaseConnection.getInstance().getConnection();
              PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, staff.getUsername());
             stmt.setString(2, staff.getPassword());
             stmt.setString(3, staff.getEmail());
-            stmt.setString(4, staff.getUserType());
-            stmt.setInt(5, staff.getUserId());
+            stmt.setInt(4, staff.getUserId());
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
