@@ -7,9 +7,17 @@ public class Book {
     private String category;
     private String status;
 
-    // Constructor
+    // Constructor, bookId ile birlikte
     public Book(int bookId, String title, String author, String category, String status) {
         this.bookId = bookId;
+        this.title = title;
+        this.author = author;
+        this.category = category;
+        this.status = status;
+    }
+
+    // Constructor, bookId parametresiz
+    public Book(String title, String author, String category, String status) {
         this.title = title;
         this.author = author;
         this.category = category;

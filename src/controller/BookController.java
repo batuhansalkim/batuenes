@@ -48,9 +48,11 @@ public class BookController {
     public Book getBookById(int bookId) {
         return bookDAO.getBookById(bookId);
     }
+    
     public boolean updateBookStatus(int bookId, String newStatus) {
     // BookDAO'dan çağrı yaparak veritabanını güncelleyin
     return bookDAO.updateBookStatus(bookId, newStatus);
 }
+
 
 }

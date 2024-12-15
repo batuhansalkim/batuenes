@@ -8,12 +8,16 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import controller.BookController;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class BooksPage extends JFrame {
     private JTable booksTable;
     private DefaultTableModel tableModel;
     private BookController bookController;
+    private JTextField searchField; // Arama kutusu ekleniyor
+    private List<Book> allBooks = new ArrayList<>(); // Kitapları tutacak liste
 
     public BooksPage() {
         // Frame ayarları
@@ -23,6 +27,8 @@ public class BooksPage extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+
+        
         // Başlık Paneli
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(100, 149, 237));
@@ -30,7 +36,18 @@ public class BooksPage extends JFrame {
         headerLabel.setFont(new Font("Arial", Font.BOLD, 22));
         headerLabel.setForeground(Color.WHITE);
         headerPanel.add(headerLabel);
-        add(headerPanel, BorderLayout.NORTH);
+        
+        // Arama kutusu ekleniyor
+        searchField = new JTextField(20); // Arama kutusu
+    searchField.addKeyListener(new java.awt.event.KeyAdapter() {
+        public void keyReleased(java.awt.event.KeyEvent evt) {
+            searchBooks(); // Arama fonksiyonunu tetikle
+        }
+    });
+    headerPanel.add(new JLabel("Ara:"));
+    headerPanel.add(searchField);
+
+    add(headerPanel, BorderLayout.NORTH);
 
         // Kitaplar Tablosu
         String[] columnNames = {"Sayı", "Kitap Adı", "Yazar", "Kategori", "Durum"};
@@ -50,22 +67,22 @@ public class BooksPage extends JFrame {
         
         // Sil Butonu
         JButton deleteBookButton = new JButton("Kitap Sil");
-deleteBookButton.addActionListener(e -> deleteSelectedBook());
-buttonPanel.add(deleteBookButton);
+        deleteBookButton.addActionListener(e -> deleteSelectedBook());
+        buttonPanel.add(deleteBookButton);
 
-// Düzenle Butonu (Yeni Eklendi)
-JButton editBookButton = new JButton("Kitap Düzenle");
-editBookButton.addActionListener(e -> {
-    int selectedRow = booksTable.getSelectedRow();
-    if (selectedRow != -1) {
-        int bookId = (int) tableModel.getValueAt(selectedRow, 0);
-        showEditBookDialog(bookId);
-    } else {
-        JOptionPane.showMessageDialog(this, "Lütfen düzenlemek istediğiniz kitabı seçin.", "Uyarı", JOptionPane.WARNING_MESSAGE);
-    }
-});
-buttonPanel.add(editBookButton);
-buttonPanel.add(editBookButton);
+        // Düzenle Butonu (Yeni Eklendi)
+        JButton editBookButton = new JButton("Kitap Düzenle");
+        editBookButton.addActionListener(e -> {
+            int selectedRow = booksTable.getSelectedRow();
+            if (selectedRow != -1) {
+                int bookId = (int) tableModel.getValueAt(selectedRow, 0);
+                showEditBookDialog(bookId);
+            } else {
+                JOptionPane.showMessageDialog(this, "Lütfen düzenlemek istediğiniz kitabı seçin.", "Uyarı", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+        buttonPanel.add(editBookButton);
+
         // Geri Dön Butonu
         JButton backButton = new JButton("Geri Dön");
         backButton.addActionListener(e -> {
@@ -97,35 +114,14 @@ buttonPanel.add(editBookButton);
         setLocationRelativeTo(null); // Ortada açılmasını sağlar
     }
 
-    private void deleteSelectedBook() {
-    int selectedRow = booksTable.getSelectedRow(); // Tablo üzerindeki seçili satır
-
-    if (selectedRow == -1) {
-        JOptionPane.showMessageDialog(this, "Lütfen silmek istediğiniz kitabı seçin.", "Uyarı", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-
-    int bookId = (int) tableModel.getValueAt(selectedRow, 0); // Kitap ID'si
-
-    int confirm = JOptionPane.showConfirmDialog(this, 
-        "Seçili kitabı silmek istediğinize emin misiniz?", 
-        "Onay", 
-        JOptionPane.YES_NO_OPTION);
-
-    if (confirm == JOptionPane.YES_OPTION) {
-        boolean success = bookController.deleteBook(bookId);
-        if (success) {
-            loadBooksFromDatabase(); // Tabloyu yenile
-            JOptionPane.showMessageDialog(this, "Kitap başarıyla silindi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Kitap silinirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-}
-
     // Veritabanından kitapları yükle
     private void loadBooksFromDatabase() {
+        // Burada veritabanından kitapları yükleme işlemini yapıyoruz
         List<Book> books = bookController.getBooks();
+
+        // Kitapları allBooks listesine ekle
+        allBooks.clear();
+        allBooks.addAll(books);
 
         // Mevcut tabloyu temizle
         tableModel.setRowCount(0);
@@ -135,90 +131,143 @@ buttonPanel.add(editBookButton);
             Object[] row = {book.getBookId(), book.getTitle(), book.getAuthor(), book.getCategory(), book.getStatus()};
             tableModel.addRow(row);
         }
-
-        // Durum sütununu JComboBox ile düzenlenebilir yap
-        String[] statuses = {"Rafta", "Odunc", "Kayıp"};
-        TableColumn statusColumn = booksTable.getColumnModel().getColumn(4);
-        JComboBox<String> statusComboBox = new JComboBox<>(new String[]{"Rafta", "Odunc", "Kayıp"});
-        statusColumn.setCellEditor(new DefaultCellEditor(statusComboBox));
-
-
-        // Tabloya listener ekle
-        tableModel.addTableModelListener(e -> {
-            int row = e.getFirstRow();
-            int column = e.getColumn();
-
-            // Durum sütununda değişiklik olmuşsa
-            if (column == 4) {
-                int bookId = (int) tableModel.getValueAt(row, 0); // Kitap ID'si
-                String newStatus = (String) tableModel.getValueAt(row, column);
-
-                // Veritabanında güncellemeyi yap
-                boolean success = bookController.updateBookStatus(bookId, newStatus);
-if (success) {
-            JOptionPane.showMessageDialog(this, "Durum başarıyla güncellendi.");
-        } else {
-            JOptionPane.showMessageDialog(this, "Durum güncellenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
-        }
-            }
-        });
     }
 
-    
+    private void showAddBookDialog() {
+    JPanel addBookPanel = new JPanel(new GridLayout(4, 2));
 
-    private void showEditBookDialog(int bookId) {
-    // Kitap bilgilerini düzenleme formu
-    Book book = bookController.getBookById(bookId);
-    if (book == null) {
-        JOptionPane.showMessageDialog(this, "Kitap bilgisi yüklenemedi.", "Hata", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
+    JTextField titleField = new JTextField();
+    JTextField authorField = new JTextField();
+    JTextField categoryField = new JTextField();
+    JComboBox<String> statusComboBox = new JComboBox<>(new String[]{"Rafta", "Odunc", "Kayıp"});
 
-    JPanel editBookPanel = new JPanel(new GridLayout(4, 2));
+    addBookPanel.add(new JLabel("Kitap Adı:"));
+    addBookPanel.add(titleField);
+    addBookPanel.add(new JLabel("Yazar:"));
+    addBookPanel.add(authorField);
+    addBookPanel.add(new JLabel("Kategori:"));
+    addBookPanel.add(categoryField);
+    addBookPanel.add(new JLabel("Durum:"));
+    addBookPanel.add(statusComboBox);
 
-    JTextField titleField = new JTextField(book.getTitle());
-    JTextField authorField = new JTextField(book.getAuthor());
-    JTextField categoryField = new JTextField(book.getCategory());
-
-    JLabel statusLabel = new JLabel("Durum:");
-    String[] statuses = bookController.getStatuses().toArray(new String[0]);
-    JComboBox<String> statusComboBox = new JComboBox<>(statuses);
-    statusComboBox.setSelectedItem(book.getStatus());
-
-    editBookPanel.add(new JLabel("Kitap Adı:"));
-    editBookPanel.add(titleField);
-    editBookPanel.add(new JLabel("Yazar:"));
-    editBookPanel.add(authorField);
-    editBookPanel.add(new JLabel("Kategori:"));
-    editBookPanel.add(categoryField);
-    editBookPanel.add(statusLabel);
-    editBookPanel.add(statusComboBox);
-
-    int option = JOptionPane.showConfirmDialog(this, editBookPanel, "Kitap Düzenle", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    int option = JOptionPane.showConfirmDialog(this, addBookPanel, "Yeni Kitap Ekle", JOptionPane.OK_CANCEL_OPTION);
     if (option == JOptionPane.OK_OPTION) {
-        String newTitle = titleField.getText();
-        String newAuthor = authorField.getText();
-        String newCategory = categoryField.getText();
-        String newStatus = (String) statusComboBox.getSelectedItem();
+        String title = titleField.getText();
+        String author = authorField.getText();
+        String category = categoryField.getText();
+        String status = (String) statusComboBox.getSelectedItem();
 
-        book.setTitle(newTitle);
-        book.setAuthor(newAuthor);
-        book.setCategory(newCategory);
-        book.setStatus(newStatus);
-
-        boolean success = bookController.updateBook(book);
+        // Yeni kitap ekleme işlemi
+        boolean success = bookController.addBook(new Book(title, author, category, status));
         if (success) {
-            loadBooksFromDatabase();
-            JOptionPane.showMessageDialog(this, "Kitap başarıyla güncellendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
+            loadBooksFromDatabase(); // Kitaplar yüklendikten sonra listeyi güncelle
+            JOptionPane.showMessageDialog(this, "Kitap başarıyla eklendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(this, "Kitap güncellenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Kitap eklenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
 
- 
+    // Arama fonksiyonu
+    private void searchBooks() {
+        String searchText = searchField.getText().toLowerCase(); // Kullanıcıdan gelen metni alıyoruz
+
+        // Mevcut tabloyu temizle
+        tableModel.setRowCount(0);
+
+        // Tablodaki kitapları filtrele
+        for (Book book : allBooks) {
+            if (book.getTitle().toLowerCase().contains(searchText) || 
+                book.getAuthor().toLowerCase().contains(searchText) || 
+                book.getCategory().toLowerCase().contains(searchText)) {
+                
+                // Arama kriterine uyan kitapları tabloya ekle
+                Object[] row = {book.getBookId(), book.getTitle(), book.getAuthor(), book.getCategory(), book.getStatus()};
+                tableModel.addRow(row);
+            }
+        }
+    }
 
 
+    
+
+    // Kitap düzenleme fonksiyonu
+    private void showEditBookDialog(int bookId) {
+        Book book = bookController.getBookById(bookId);
+        if (book == null) {
+            JOptionPane.showMessageDialog(this, "Kitap bilgisi yüklenemedi.", "Hata", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JPanel editBookPanel = new JPanel(new GridLayout(4, 2));
+
+        JTextField titleField = new JTextField(book.getTitle());
+        JTextField authorField = new JTextField(book.getAuthor());
+        JTextField categoryField = new JTextField(book.getCategory());
+
+        JLabel statusLabel = new JLabel("Durum:");
+        String[] statuses = bookController.getStatuses().toArray(new String[0]);
+        JComboBox<String> statusComboBox = new JComboBox<>(statuses);
+        statusComboBox.setSelectedItem(book.getStatus());
+
+        editBookPanel.add(new JLabel("Kitap Adı:"));
+        editBookPanel.add(titleField);
+        editBookPanel.add(new JLabel("Yazar:"));
+        editBookPanel.add(authorField);
+        editBookPanel.add(new JLabel("Kategori:"));
+        editBookPanel.add(categoryField);
+        editBookPanel.add(statusLabel);
+        editBookPanel.add(statusComboBox);
+
+        int option = JOptionPane.showConfirmDialog(this, editBookPanel, "Kitap Düzenle", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option == JOptionPane.OK_OPTION) {
+            String newTitle = titleField.getText();
+            String newAuthor = authorField.getText();
+            String newCategory = categoryField.getText();
+            String newStatus = (String) statusComboBox.getSelectedItem();
+
+            book.setTitle(newTitle);
+            book.setAuthor(newAuthor);
+            book.setCategory(newCategory);
+            book.setStatus(newStatus);
+
+            boolean success = bookController.updateBook(book);
+            if (success) {
+                loadBooksFromDatabase();
+                JOptionPane.showMessageDialog(this, "Kitap başarıyla güncellendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Kitap güncellenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    // Kitap silme fonksiyonu
+    private void deleteSelectedBook() {
+        int selectedRow = booksTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Lütfen silmek istediğiniz kitabı seçin.", "Uyarı", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int bookId = (int) tableModel.getValueAt(selectedRow, 0);
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Seçili kitabı silmek istediğinize emin misiniz?",
+                "Onay",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            boolean success = bookController.deleteBook(bookId);
+            if (success) {
+                loadBooksFromDatabase();
+                JOptionPane.showMessageDialog(this, "Kitap başarıyla silindi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Kitap silinirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    // Kitap işlemleri dialogu
     private void showBookOptionsDialog(int bookId) {
         int option = JOptionPane.showOptionDialog(this,
                 "Seçeneklerden birini seçin:",
@@ -229,7 +278,7 @@ if (success) {
                 new String[]{"Sil", "Düzenle", "Vazgeç"},
                 "Vazgeç");
 
-        if (option == 0) { // Sil seçeneği
+        if (option == 0) {
             int confirm = JOptionPane.showConfirmDialog(this, "Kitabı silmek istediğinize emin misiniz?", "Onay", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 boolean success = bookController.deleteBook(bookId);
@@ -240,63 +289,10 @@ if (success) {
                     JOptionPane.showMessageDialog(this, "Kitap silinirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        } else if (option == 1) { // Düzenle seçeneği
+        } else if (option == 1) {
             showEditBookDialog(bookId);
         }
     }
-   
-    private void showAddBookDialog() {
-        JPanel addBookPanel = new JPanel(new GridLayout(5, 2));
-
-        JLabel titleLabel = new JLabel("Kitap Adı:");
-        JTextField titleField = new JTextField(20);
-        addBookPanel.add(titleLabel);
-        addBookPanel.add(titleField);
-
-        JLabel authorLabel = new JLabel("Yazar Adı:");
-        JTextField authorField = new JTextField(20);
-        addBookPanel.add(authorLabel);
-        addBookPanel.add(authorField);
-
-        JLabel categoryLabel = new JLabel("Kategori:");
-        JTextField categoryField = new JTextField(20);
-        addBookPanel.add(categoryLabel);
-        addBookPanel.add(categoryField);
-
-        JLabel statusLabel = new JLabel("Durum:");
-        JTextField statusField = new JTextField(20);
-        addBookPanel.add(statusLabel);
-        addBookPanel.add(statusField);
-
-        int option = JOptionPane.showConfirmDialog(this, addBookPanel, "Yeni Kitap Ekle", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (option == JOptionPane.OK_OPTION) {
-            String bookName = titleField.getText();
-            String authorName = authorField.getText();
-            String category = categoryField.getText();
-            String status = statusField.getText();
-
-            if (bookName.trim().isEmpty() || authorName.trim().isEmpty() || category.trim().isEmpty() || status.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Lütfen tüm alanları doldurun!", "Hata", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            Book newBook = new Book(0, bookName, authorName, category, status);
-            boolean success = bookController.addBook(newBook);
-
-            if (success) {
-                loadBooksFromDatabase();
-                JOptionPane.showMessageDialog(this, "Kitap başarıyla eklendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Kitap eklenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-
-
-
-
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
