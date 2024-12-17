@@ -1,38 +1,30 @@
 package views;
 
 import javax.swing.*;
-
 import controller.UserController;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class RegisterPage extends JFrame {
+public class RegisterPage extends AbstractPage {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JTextField emailField;
     private UserController userController;
 
     public RegisterPage() {
-        // Controller nesnesi
+        super(); // AbstractPage'in constructor'ını çağırarak temel yapılandırmayı sağlıyoruz
         userController = new UserController();
+        showPage(); // Sayfayı başlat
+    }
 
-        // Frame ayarları
-        setTitle("Kayıt Ol Sayfası");
-        setSize(450, 400); // Yüksekliği artırdık, "Login" butonu için
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+    @Override
+    protected String getTitleText() {
+        return "Hesap Oluşturun"; // Başlık metni
+    }
 
-        // Başlık Paneli
-        JPanel headerPanel = new JPanel();
-        headerPanel.setBackground(new Color(100, 149, 237));
-        JLabel headerLabel = new JLabel("Hesap Oluşturun");
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        headerLabel.setForeground(Color.WHITE);
-        headerPanel.add(headerLabel);
-        add(headerPanel, BorderLayout.NORTH);
-
+    @Override
+    public void showPage() {
         // Kayıt Paneli
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // İç boşluk

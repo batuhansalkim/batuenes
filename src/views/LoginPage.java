@@ -1,16 +1,14 @@
 package views;
 
+import controller.UserController;
 import models.User;
 
 import javax.swing.*;
-
-import controller.UserController;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class LoginPage extends JFrame {
+public class LoginPage extends AbstractPage {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private UserController userController;
@@ -106,6 +104,11 @@ public class LoginPage extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    @Override
+    public void showPage() {
+        setVisible(true);
+    }
+
     private void login() {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
@@ -159,12 +162,5 @@ public class LoginPage extends JFrame {
         // Ekranın ortasında göster
         errorDialog.setLocationRelativeTo(this);
         errorDialog.setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            LoginPage loginPage = new LoginPage();
-            loginPage.setVisible(true);
-        });
     }
 }
