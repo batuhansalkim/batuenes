@@ -4,7 +4,10 @@ import models.Book;
 import dao.BookDAO;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
+
+import config.DatabaseConnection;
 
 public class BookController {
     private BookDAO bookDAO;
@@ -28,6 +31,37 @@ public class BookController {
     public boolean addBook(Book book) {
         return bookDAO.addBook(book);
     }
+// BookController.java
+public List<String> getCategories() {
+    List<String> categories = new ArrayList<>();
+    String sql = "SHOW COLUMNS FROM books LIKE 'category'";
+
+    try (Connection conn = DatabaseConnection.getInstance().getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+
+        if (rs.next()) {
+            String enumValues = rs.getString("Type"); // ENUM değerlerini içeren sütun
+            enumValues = enumValues.replace("enum(", "").replace(")", "").replace("'", "");
+            String[] values = enumValues.split(",");
+
+            for (String value : values) {
+                categories.add(value);
+            }
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return categories;
+}
+
+public boolean addCategory(String categoryName) {
+    return bookDAO.addCategory(categoryName);
+}
+
+
+
 
     // Kitap silme
     public boolean deleteBook(int bookId) {

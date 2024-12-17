@@ -85,6 +85,19 @@ public class BookDAO {
         }
     }
 
+    public boolean addCategory(String categoryName) {
+    String sql = "ALTER TABLE books MODIFY category ENUM('Aşk', 'Polisiye', 'Bilim', ?)";
+
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, categoryName);
+        stmt.executeUpdate();
+        return true;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
     // Kitap durumlarını veritabanından çekme
     public List<String> getStatuses() {
         List<String> statuses = new ArrayList<>();

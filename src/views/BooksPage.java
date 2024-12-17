@@ -60,6 +60,11 @@ public class BooksPage extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout());
 
+        // Kategori Ekle Butonu
+JButton addCategoryButton = new JButton("Kategori Ekle");
+addCategoryButton.addActionListener(e -> showAddCategoryDialog());
+buttonPanel.add(addCategoryButton);
+
         // Kitap Ekle Butonu
         JButton addBookButton = new JButton("Kitap Ekle");
         addBookButton.addActionListener(e -> showAddBookDialog());
@@ -133,20 +138,48 @@ public class BooksPage extends JFrame {
         }
     }
 
+    private void showAddCategoryDialog() {
+    JTextField categoryField = new JTextField();
+
+    JPanel panel = new JPanel(new GridLayout(1, 2));
+    panel.add(new JLabel("Kategori Adı:"));
+    panel.add(categoryField);
+
+    int option = JOptionPane.showConfirmDialog(this, panel, "Yeni Kategori Ekle", JOptionPane.OK_CANCEL_OPTION);
+    if (option == JOptionPane.OK_OPTION) {
+        String categoryName = categoryField.getText();
+        if (categoryName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Kategori adı boş olamaz.", "Hata", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        boolean success = bookController.addCategory(categoryName);
+        if (success) {
+            JOptionPane.showMessageDialog(this, "Kategori başarıyla eklendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
+            loadBooksFromDatabase(); // Kategorileri yenile
+        } else {
+            JOptionPane.showMessageDialog(this, "Kategori eklenirken hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
+
     private void showAddBookDialog() {
     JPanel addBookPanel = new JPanel(new GridLayout(4, 2));
 
     JTextField titleField = new JTextField();
     JTextField authorField = new JTextField();
-    JTextField categoryField = new JTextField();
+    List<String> categories = bookController.getCategories();
+    JComboBox<String> categoryComboBox = new JComboBox<>(categories.toArray(new String[0]));
+    
     JComboBox<String> statusComboBox = new JComboBox<>(new String[]{"Rafta", "Odunc", "Kayıp"});
+
 
     addBookPanel.add(new JLabel("Kitap Adı:"));
     addBookPanel.add(titleField);
     addBookPanel.add(new JLabel("Yazar:"));
     addBookPanel.add(authorField);
     addBookPanel.add(new JLabel("Kategori:"));
-    addBookPanel.add(categoryField);
+    addBookPanel.add(categoryComboBox);
     addBookPanel.add(new JLabel("Durum:"));
     addBookPanel.add(statusComboBox);
 
@@ -154,7 +187,7 @@ public class BooksPage extends JFrame {
     if (option == JOptionPane.OK_OPTION) {
         String title = titleField.getText();
         String author = authorField.getText();
-        String category = categoryField.getText();
+        String category = (String) categoryComboBox.getSelectedItem();
         String status = (String) statusComboBox.getSelectedItem();
 
         // Yeni kitap ekleme işlemi
@@ -193,53 +226,57 @@ public class BooksPage extends JFrame {
 
     // Kitap düzenleme fonksiyonu
     private void showEditBookDialog(int bookId) {
-        Book book = bookController.getBookById(bookId);
-        if (book == null) {
-            JOptionPane.showMessageDialog(this, "Kitap bilgisi yüklenemedi.", "Hata", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+    Book book = bookController.getBookById(bookId);
+    if (book == null) {
+        JOptionPane.showMessageDialog(this, "Kitap bilgisi yüklenemedi.", "Hata", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
-        JPanel editBookPanel = new JPanel(new GridLayout(4, 2));
+    JPanel editBookPanel = new JPanel(new GridLayout(4, 2));
 
-        JTextField titleField = new JTextField(book.getTitle());
-        JTextField authorField = new JTextField(book.getAuthor());
-        JTextField categoryField = new JTextField(book.getCategory());
+    JTextField titleField = new JTextField(book.getTitle());
+    JTextField authorField = new JTextField(book.getAuthor());
 
-        JLabel statusLabel = new JLabel("Durum:");
-        String[] statuses = bookController.getStatuses().toArray(new String[0]);
-        JComboBox<String> statusComboBox = new JComboBox<>(statuses);
-        statusComboBox.setSelectedItem(book.getStatus());
+    // Kategoriler veritabanından alınarak JComboBox'a ekleniyor
+    JComboBox<String> categoryComboBox = new JComboBox<>(bookController.getCategories().toArray(new String[0]));
+    categoryComboBox.setSelectedItem(book.getCategory()); // Mevcut kategori seçili olsun
 
-        editBookPanel.add(new JLabel("Kitap Adı:"));
-        editBookPanel.add(titleField);
-        editBookPanel.add(new JLabel("Yazar:"));
-        editBookPanel.add(authorField);
-        editBookPanel.add(new JLabel("Kategori:"));
-        editBookPanel.add(categoryField);
-        editBookPanel.add(statusLabel);
-        editBookPanel.add(statusComboBox);
+    JLabel statusLabel = new JLabel("Durum:");
+    String[] statuses = bookController.getStatuses().toArray(new String[0]);
+    JComboBox<String> statusComboBox = new JComboBox<>(statuses);
+    statusComboBox.setSelectedItem(book.getStatus()); // Mevcut durum seçili olsun
 
-        int option = JOptionPane.showConfirmDialog(this, editBookPanel, "Kitap Düzenle", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (option == JOptionPane.OK_OPTION) {
-            String newTitle = titleField.getText();
-            String newAuthor = authorField.getText();
-            String newCategory = categoryField.getText();
-            String newStatus = (String) statusComboBox.getSelectedItem();
+    editBookPanel.add(new JLabel("Kitap Adı:"));
+    editBookPanel.add(titleField);
+    editBookPanel.add(new JLabel("Yazar:"));
+    editBookPanel.add(authorField);
+    editBookPanel.add(new JLabel("Kategori:"));
+    editBookPanel.add(categoryComboBox);
+    editBookPanel.add(statusLabel);
+    editBookPanel.add(statusComboBox);
 
-            book.setTitle(newTitle);
-            book.setAuthor(newAuthor);
-            book.setCategory(newCategory);
-            book.setStatus(newStatus);
+    int option = JOptionPane.showConfirmDialog(this, editBookPanel, "Kitap Düzenle", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    if (option == JOptionPane.OK_OPTION) {
+        String newTitle = titleField.getText();
+        String newAuthor = authorField.getText();
+        String newCategory = (String) categoryComboBox.getSelectedItem(); // Seçilen kategori
+        String newStatus = (String) statusComboBox.getSelectedItem(); // Seçilen durum
 
-            boolean success = bookController.updateBook(book);
-            if (success) {
-                loadBooksFromDatabase();
-                JOptionPane.showMessageDialog(this, "Kitap başarıyla güncellendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Kitap güncellenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
-            }
+        book.setTitle(newTitle);
+        book.setAuthor(newAuthor);
+        book.setCategory(newCategory); // Yeni kategori atanıyor
+        book.setStatus(newStatus); // Yeni durum atanıyor
+
+        boolean success = bookController.updateBook(book);
+        if (success) {
+            loadBooksFromDatabase(); // Tabloyu güncelle
+            JOptionPane.showMessageDialog(this, "Kitap başarıyla güncellendi.", "Başarılı", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Kitap güncellenirken bir hata oluştu.", "Hata", JOptionPane.ERROR_MESSAGE);
         }
     }
+}
+
 
     // Kitap silme fonksiyonu
     private void deleteSelectedBook() {
