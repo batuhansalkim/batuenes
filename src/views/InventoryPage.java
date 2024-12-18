@@ -27,57 +27,111 @@ public class InventoryPage extends JFrame {
         libraryController = new LibraryController(); // LibraryController'dan verileri alıyoruz
 
         setTitle("Envanter Sayfası - Kütüphane Yönetim Sistemi");
-        setSize(600, 500);
+        setSize(600, 600); // Sayfa boyutunu artırdık
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(10, 2, 10, 10)); // 10 satır ve 2 sütun olacak şekilde düzenlendi
+        setLayout(new BorderLayout(10, 10)); // Ana layout'u BorderLayout yapıyoruz
 
         // Başlık Paneli
         JPanel headerPanel = new JPanel();
         headerPanel.setBackground(new Color(70, 130, 180));
         JLabel headerLabel = new JLabel("Kütüphane Envanteri");
-        headerLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 26));
         headerLabel.setForeground(Color.WHITE);
         headerPanel.add(headerLabel);
         add(headerPanel, BorderLayout.NORTH);
 
         // Bilgiler paneli
-        studentCountLabel = new JLabel("Toplam Öğrenci Sayısı: ");
-        adminCountLabel = new JLabel("Toplam Admin Sayısı: ");
-        totalBooksLabel = new JLabel("Toplam Kitap Sayısı: ");
-        lostBooksLabel = new JLabel("Kayıp Kitap Sayısı: ");
-        borrowedBooksLabel = new JLabel("Ödünç Verilmiş Kitap Sayısı: ");
-        booksOnShelfLabel = new JLabel("Rafta Bulunan Kitap Sayısı: ");
+        JPanel infoPanel = new JPanel(new GridLayout(7, 2, 10, 10));
+        studentCountLabel = createStyledLabel("Toplam Öğrenci Sayısı: ");
+        adminCountLabel = createStyledLabel("Toplam Admin Sayısı: ");
+        totalBooksLabel = createStyledLabel("Toplam Kitap Sayısı: ");
+        lostBooksLabel = createStyledLabel("Kayıp Kitap Sayısı: ");
+        borrowedBooksLabel = createStyledLabel("Ödünç Verilmiş Kitap Sayısı: ");
+        booksOnShelfLabel = createStyledLabel("Rafta Bulunan Kitap Sayısı: ");
         
         // Kitap Durumu paneli
-        borrowedBooksStatusLabel = new JLabel("Ödünç Verilen Kitap Durumu: ");
-        booksOnShelfStatusLabel = new JLabel("Rafta Kitap Durumu: ");
-        lostBooksStatusLabel = new JLabel("Kayıp Kitap Durumu: ");
+        borrowedBooksStatusLabel = createStyledLabel("Ödünç Verilen Kitap Durumu: ");
+        booksOnShelfStatusLabel = createStyledLabel("Rafta Kitap Durumu: ");
+        lostBooksStatusLabel = createStyledLabel("Kayıp Kitap Durumu: ");
         
-        // Envanter verilerinin paneli
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(studentCountLabel);
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(adminCountLabel);
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(totalBooksLabel);
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(lostBooksLabel);
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(borrowedBooksLabel);
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(booksOnShelfLabel);
+        // Bilgileri ekliyoruz
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(studentCountLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(adminCountLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(totalBooksLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(lostBooksLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(borrowedBooksLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(booksOnShelfLabel);
         
         // Kitap Durumu Paneli
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(borrowedBooksStatusLabel);
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(booksOnShelfStatusLabel);
-        add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
-        add(lostBooksStatusLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(borrowedBooksStatusLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(booksOnShelfStatusLabel);
+        infoPanel.add(new JLabel("")); // Boş bir label ekleyerek düzeni sağlıyoruz
+        infoPanel.add(lostBooksStatusLabel);
 
         loadInventoryData(); // Envanter verilerini yükleyen metot
 
+        add(infoPanel, BorderLayout.CENTER); // Bilgiler panelini merkeze ekliyoruz
+
+        // Footer Paneli
+        JPanel footerPanel = new JPanel();
+        footerPanel.setBackground(Color.BLUE); // Footer arka planı mavi yapıyoruz
+        footerPanel.setLayout(new BorderLayout());  // BorderLayout kullanıyoruz
+
+        // Footer yazısı
+        JLabel footerLabel = new JLabel("<html><center>" +
+            "<p><strong style='color:white;'>Kırklareli Üniversitesi Yazılım Mimarisi ve Tasarımı Dersi</strong></p>" +
+            "<p style='color:white;'>Bu uygulama, Kırklareli Üniversitesi Yazılım Mimarisi ve Tasarımı dersi için Batuhan Salkım ve Enes Yenigün tarafından kodlanmıştır.</p>" +
+            "<p style='color:white;'>Aşağıdaki veriler kütüphane yönetim sisteminin istatistiksel verilerini yansıtmaktadır.</p>" +
+            "<p><strong style='color:white;'>Uygulama Özellikleri:</strong></p>" +
+            "<ul style='color:white;'>" +
+            "<li>Kütüphanedeki toplam kitap sayısını görüntüleyebilirsiniz.</li>" +
+            "<li>Ödünç alınmış kitaplar ve kayıp kitaplar hakkında bilgi alabilirsiniz.</li>" +
+            "<li>Öğrenci ve admin sayısını görebilirsiniz.</li>" +
+            "</ul>" +
+            "</center></html>");
+        
+        footerLabel.setFont(new Font("Arial", Font.PLAIN, 14)); // Yazı fontu
+        footerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        footerPanel.add(footerLabel, BorderLayout.CENTER);
+
+        // Footer panelin genişliğini ve yüksekliğini arttırıyoruz
+        footerPanel.setPreferredSize(new Dimension(getWidth(), 200)); // Footer yüksekliğini arttırdık
+
+        // Alt kısıma footerPanel'ı ekleyelim
+        add(footerPanel, BorderLayout.SOUTH);
+
+        // "Geri" Butonu Ekleme
+        JButton backButton = new JButton("Geri");
+        backButton.addActionListener(e -> {
+            dispose(); // InventoryPage'i kapat
+            HomePage homePage = new HomePage("staff"); // "staff" veya "student" kullanabilirsiniz
+            homePage.setVisible(true); // HomePage'i görünür hale getir
+        });
+        
+        // Geri butonunu footerPanel'e ekleyelim
+        footerPanel.add(backButton, BorderLayout.SOUTH);
+
         setLocationRelativeTo(null); // Ekranın ortasında açılması için
+    }
+
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.PLAIN, 16));
+        label.setForeground(new Color(50, 50, 50));  // Gri renk
+        label.setOpaque(true);
+        label.setBackground(new Color(230, 230, 255)); // Hafif mor arka plan
+        label.setBorder(BorderFactory.createLineBorder(new Color(100, 100, 255), 1));  // Mavi kenarlık
+        label.setHorizontalAlignment(SwingConstants.LEFT);
+        label.setPreferredSize(new Dimension(250, 30));
+        return label;
     }
 
     private void loadInventoryData() {

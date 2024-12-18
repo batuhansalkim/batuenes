@@ -2,6 +2,7 @@ package views;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import views.InventoryPage;
 
 public class HomePage extends JFrame {
     public HomePage(String userType) {
@@ -74,7 +75,12 @@ public class HomePage extends JFrame {
             StudentsPage studentsPage = new StudentsPage(); // StudentsPage ekranını başlat
             studentsPage.setVisible(true); // StudentsPage'i görünür yap
         });
-        inventoryButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Envanter ekranına yönlendiriliyorsunuz."));
+        inventoryButton.addActionListener(e -> {
+    dispose(); // Close the current HomePage
+    InventoryPage inventoryPage = new InventoryPage(); // Create an instance of InventoryPage
+    inventoryPage.setVisible(true); // Make InventoryPage visible
+});
+
         notificationsButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Bildirim gönderme ekranına yönlendiriliyorsunuz."));
         logoutButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, "Çıkmak istediğinize emin misiniz?", "Çıkış", JOptionPane.YES_NO_OPTION);
