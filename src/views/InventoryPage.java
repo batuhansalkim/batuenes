@@ -110,6 +110,8 @@ public class InventoryPage extends JFrame {
 
         // "Geri" Butonu Ekleme
         JButton backButton = new JButton("Geri");
+        backButton.setBackground(Color.BLACK); // Arka plan rengini siyah yapıyoruz
+backButton.setForeground(Color.WHITE); // Metin rengini beyaz yapıyoruz
         backButton.addActionListener(e -> {
             dispose(); // InventoryPage'i kapat
             HomePage homePage = new HomePage("staff"); // "staff" veya "student" kullanabilirsiniz
