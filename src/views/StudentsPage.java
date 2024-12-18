@@ -1,4 +1,3 @@
-// StudentsPage.java
 package views;
 
 import javax.swing.*;
@@ -72,10 +71,12 @@ public class StudentsPage extends JFrame {
         JButton addButton = new JButton("Ekle");
         JButton editButton = new JButton("Düzenle");
         JButton deleteButton = new JButton("Sil");
+        JButton backButton = new JButton("Geri"); // Geri butonunu ekliyoruz
 
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(backButton); // Geri butonunu panelimize ekliyoruz
 
         add(buttonPanel, BorderLayout.SOUTH);
 
@@ -83,12 +84,21 @@ public class StudentsPage extends JFrame {
         addButton.addActionListener(e -> showAddUserDialog());
         editButton.addActionListener(e -> handleEditButtonClick());
         deleteButton.addActionListener(e -> handleDeleteButtonClick());
+        backButton.addActionListener(e -> goBackToHomePage()); // Geri butonuna aksiyon ekliyoruz
 
         loadUsersFromDatabase();
 
         setLocationRelativeTo(null);
     }
 
+    private void goBackToHomePage() {
+        // Geri butonuna basıldığında ana sayfaya yönlendirme yapılır
+        HomePage homePage = new HomePage("staff");
+        homePage.setVisible(true);
+        this.dispose(); // Current StudentsPage penceresini kapatıyoruz
+    }
+
+    // Diğer metotlar aynı kalacak
     private void loadUsersFromDatabase() {
         // Load students
         List<User> students = studentController.getStudents();
