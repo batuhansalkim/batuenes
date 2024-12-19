@@ -17,12 +17,10 @@ public class HomePage extends JFrame {
         buttonPanel.setLayout(new GridLayout(3, 2, 10, 10));
 
         JButton booksButton = new JButton("Kitaplar");
-        JButton studentsButton = new JButton("Öğrenciler-Personeller");
-        JButton inventoryButton = new JButton("Envanter");
-        JButton notificationsButton = new JButton("Bildirim Gönder");
+        JButton loanedBooksButton = new JButton("Ödünç Alınan Kitaplar");
         JButton logoutButton = new JButton("Çıkış");
 
-        // Kullanıcı türüne göre kitaplar butonunun davranışı
+        // Kitaplar butonunun davranışı
         booksButton.addActionListener(e -> {
             if ("staff".equals(userType)) {
                 new BooksPage().setVisible(true); // Staff için BooksPage açılır
@@ -31,25 +29,18 @@ public class HomePage extends JFrame {
             }
         });
 
-        studentsButton.addActionListener(e -> mediator.notify(studentsButton, "click"));
-        inventoryButton.addActionListener(e -> mediator.notify(inventoryButton, "click"));
-        notificationsButton.addActionListener(e -> mediator.notify(notificationsButton, "click"));
-        logoutButton.addActionListener(e -> mediator.notify(logoutButton, "click"));
+        // Ödünç Alınan Kitaplar butonunun davranışı
+        loanedBooksButton.addActionListener(e -> new LoanedBooksPage().setVisible(true));
 
-        ((HomePageMediator) mediator).setBooksButton(booksButton);
-        ((HomePageMediator) mediator).setLogoutButton(logoutButton);
+        // Çıkış butonunun davranışı
+        logoutButton.addActionListener(e -> mediator.notify(logoutButton, "click"));
 
         buttonPanel.add(booksButton);
         buttonPanel.add(logoutButton);
 
-        if ("staff".equals(userType)) {
-            ((HomePageMediator) mediator).setStudentsButton(studentsButton);
-            ((HomePageMediator) mediator).setInventoryButton(inventoryButton);
-            ((HomePageMediator) mediator).setNotificationsButton(notificationsButton);
-
-            buttonPanel.add(studentsButton);
-            buttonPanel.add(inventoryButton);
-            buttonPanel.add(notificationsButton);
+        // Student girişine özel buton ekleme
+        if ("student".equals(userType)) {
+            buttonPanel.add(loanedBooksButton);
         }
 
         add(buttonPanel, BorderLayout.CENTER);
@@ -59,7 +50,7 @@ public class HomePage extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            HomePage homePage = new HomePage("staff"); // veya "student" olarak değiştirilebilir
+            HomePage homePage = new HomePage("student"); // veya "staff" olarak değiştirilebilir
             homePage.setVisible(true);
         });
     }
