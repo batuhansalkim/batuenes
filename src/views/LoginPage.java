@@ -103,9 +103,16 @@ public class LoginPage extends AbstractPage {
         User user = userController.login(username, password);
 
         if (user != null) {
-            // User is valid, show HomePage
-            HomePage homePage = new HomePage(user.getUserType());
-            homePage.setVisible(true);
+            // User is valid, show appropriate page
+            if ("student".equals(user.getUserType())) {
+                // If user is a student, open StuBooksPage
+                StuBooksPage stuBooksPage = new StuBooksPage();
+                stuBooksPage.setVisible(true);
+            } else {
+                // If user is staff, open HomePage
+                HomePage homePage = new HomePage(user.getUserType());
+                homePage.setVisible(true);
+            }
             dispose(); // Close login page
         } else {
             showErrorDialog("Username or password is incorrect!");
