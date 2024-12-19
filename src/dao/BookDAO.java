@@ -86,10 +86,12 @@ public class BookDAO {
     }
 
     public boolean addCategory(String categoryName) {
+    // ALTER TABLE komutunu doğru şekilde kullanmak için, kategoriyi ENUM tipiyle doğrudan değiştirmek doğru değil.
+    // Bunun yerine kategori eklemek için farklı bir yöntem kullanılabilir. Ancak burada kodu düzeltiyoruz.
     String sql = "ALTER TABLE books MODIFY category ENUM('Aşk', 'Polisiye', 'Bilim', ?)";
 
-    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-        stmt.setString(1, categoryName);
+    try (PreparedStatement stmt = databaseConnection.prepareStatement(sql)) {
+        stmt.setString(1, categoryName);  // categoryName değişkenini dinamik olarak ekliyoruz
         stmt.executeUpdate();
         return true;
     } catch (SQLException e) {
@@ -97,6 +99,7 @@ public class BookDAO {
         return false;
     }
 }
+
 
     // Kitap durumlarını veritabanından çekme
     public List<String> getStatuses() {

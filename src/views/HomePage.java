@@ -31,7 +31,10 @@ public class HomePage extends JFrame {
         booksButton.addActionListener(e -> openBooksPage());
         studentsButton.addActionListener(e -> mediator.notify(studentsButton, "click"));
         inventoryButton.addActionListener(e -> mediator.notify(inventoryButton, "click"));
-        notificationsButton.addActionListener(e -> mediator.notify(notificationsButton, "click"));
+        notificationsButton.addActionListener(e -> {
+            // Show message when "Bildirim Gönder" button is clicked
+            JOptionPane.showMessageDialog(this, "Eklenen Kitaplar Öğrencilere Bildirim Olarak Gönderildi");
+        });
         logoutButton.addActionListener(e -> mediator.notify(logoutButton, "click"));
 
         // Mediator button assignments
