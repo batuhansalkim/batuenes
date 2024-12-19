@@ -48,7 +48,6 @@ Kullanıcı bilgilerinin doğrulanması ve uygun rolün atanması.
 Yeni kullanıcıların sisteme kayıt olması için form tabanlı bir arayüz sunar.
 
 4. HomePage.java
-![image](https://github.com/user-attachments/assets/efe02453-2e0d-4973-b721-9b2c84995636)
 
 Kullanıcının rolüne göre farklı sayfalara yönlendirme yapar.
 
